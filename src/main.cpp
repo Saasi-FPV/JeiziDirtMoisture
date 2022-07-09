@@ -1,41 +1,43 @@
-#include <Arduino.h>
+/*
+ Basic MQTT example with Authentication
 
+  - connects to an MQTT server, providing username
+    and password
+  - publishes "hello world" to the topic "outTopic"
+  - subscribes to the topic "inTopic"
+*/
 
-int TimeToSleep = 10 * 1000000;
+#include <SPI.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
 
+// Update these with values suitable for your network.
+byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
+IPAddress ip(172, 16, 0, 100);
+IPAddress server(172, 16, 0, 2);
 
-void setup() {
-  Serial.begin(115200);
-  delay(1000);
-  esp_sleep_enable_timer_wakeup(TimeToSleep);
-
-  pinMode(2, OUTPUT);
-  pinMode(A5, INPUT);
-
-  Serial.println("Bi Wach");
-  digitalWrite(2, HIGH);
-
-
-  for(int i = 0; i < 10; i++){
-    float tempVal = analogRead(A5);
-    Serial.print("RAW ADC");
-    Serial.println(tempVal);
-    tempVal = (tempVal * 3.3) / 4096;
-    Serial.print("ADC misst mist?: ");
-    Serial.println(tempVal);
-  }
-
-
-
-  delay(1000);
-  Serial.println("Gang ga Schl...ZZZZZZZZZZZ");
-  esp_deep_sleep_start();
-
-
-
-
+void callback(char* topic, byte* payload, unsigned int length) {
+  // handle message arrived
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+WiFiClient WiFi;
+PubSubClient client(server, 1883, callback, WiFi);
+
+void setup()
+{
+  WiFi.begin(mac, ip);
+  // Note - the default maximum packet size is 128 bytes. If the
+  // combined length of clientId, username and password exceed this use the
+  // following to increase the buffer size:
+  // client.setBufferSize(255);
+  
+  if (client.connect("arduinoClient", "testuser", "testpass")) {
+    client.publish("outTopic","hello world");
+    client.subscribe("inTopic");
+  }
+}
+
+void loop()
+{
+  client.loop();
 }
