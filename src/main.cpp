@@ -1,43 +1,43 @@
-/*
- Basic MQTT example with Authentication
-
-  - connects to an MQTT server, providing username
-    and password
-  - publishes "hello world" to the topic "outTopic"
-  - subscribes to the topic "inTopic"
-*/
-
-#include <SPI.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-// Update these with values suitable for your network.
-byte mac[]    = {  0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };
-IPAddress ip(172, 16, 0, 100);
-IPAddress server(172, 16, 0, 2);
+const char* ssid = "chjasipa";
+const char* password = "0661114160";
+const char* mqttServer = "mqtt.tanglehive.org";
+const int mqttPort = 1883;
+const char* mqttUser = "jeizimqtt";
+const char* mqttPassword = "aayEwsyqbxsS7re";
 
-void callback(char* topic, byte* payload, unsigned int length) {
-  // handle message arrived
-}
+WiFiClient espClient;
+PubSubClient client(espClient);
 
-WiFiClient WiFi;
-PubSubClient client(server, 1883, callback, WiFi);
-
-void setup()
-{
-  WiFi.begin(mac, ip);
-  // Note - the default maximum packet size is 128 bytes. If the
-  // combined length of clientId, username and password exceed this use the
-  // following to increase the buffer size:
-  // client.setBufferSize(255);
-  
-  if (client.connect("arduinoClient", "testuser", "testpass")) {
-    client.publish("outTopic","hello world");
-    client.subscribe("inTopic");
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Connecting to WiFi..");
   }
+  Serial.println("Connected to the WiFi network");
+  
+  client.setServer(mqttServer, mqttPort);
+  while (!client.connected()) {
+    Serial.println("Connecting to MQTT...");
+    if (client.connect("ESP32Client", mqttUser, mqttPassword )) {
+      Serial.println("connected");
+    } else {
+      Serial.print("failed with state ");
+      Serial.print(client.state());
+      delay(2000);
+    }
+  }
+  client.publish("esp32/test", "Hello from ESP32");
 }
 
-void loop()
-{
+void loop() {
   client.loop();
+  Serial.println(client.state());
+  client.publish("esp32/test", "Hello from ESP32");
+  delay(10000);
+
 }
