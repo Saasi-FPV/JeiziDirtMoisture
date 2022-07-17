@@ -31,13 +31,41 @@ void setup() {
       delay(2000);
     }
   }
-  client.publish("esp32/test", "Hello from ESP32");
+  client.publish("esp32test/test", "Startlog");
+
+
+
+
+  touch_pad_init();
+  touch_pad_set_voltage(TOUCH_HVOLT_2V4, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
+  touch_pad_config(TOUCH_PAD_NUM2, 0);
+
+
+
 }
 
 void loop() {
+
+  
+  uint16_t value;                // = touchRead(T2);
+  touch_pad_read(TOUCH_PAD_NUM2, &value);
+  char payload[16];
+  itoa(value, payload, 10);
+
+  Serial.println(value);
+
   client.loop();
   Serial.println(client.state());
-  client.publish("esp32/test", "Hello from ESP32");
-  delay(10000);
+  client.publish("esp32test/moisture", payload);
 
+
+  int RSSI = WiFi.RSSI();
+  Serial.print("RSSI: ");
+  Serial.println(RSSI);
+  char RSSIChar[16];
+  itoa(RSSI, RSSIChar, 10);
+  client.publish("esp32test/RSSI", RSSIChar);
+
+
+  delay(2000);
 }
