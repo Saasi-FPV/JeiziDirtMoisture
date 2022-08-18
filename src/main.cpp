@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
+
 const char* ssid = "chjasipa";
 const char* password = "0661114160";
 const char* mqttServer = "mqtt.tanglehive.org";
@@ -31,7 +32,6 @@ void setup() {
       delay(2000);
     }
   }
-  client.publish("esp32test/test", "Startlog");
 
 
 
@@ -46,25 +46,26 @@ void setup() {
 
 void loop() {
 
-  
-  uint16_t value;                // = touchRead(T2);
-  touch_pad_read(TOUCH_PAD_NUM2, &value);
-  char payload[16];
-  itoa(value, payload, 10);
-
-  Serial.println(value);
-
   client.loop();
   Serial.println(client.state());
-  client.publish("esp32test/moisture", payload);
+
+  
+  uint16_t value;
+  char valueChar[16];
+  touch_pad_read(TOUCH_PAD_NUM2, &value);
+  itoa(value, valueChar, 10);
+  Serial.print("Messwert: ");
+  Serial.println(value);
+  client.publish("Sensor1/moisture", valueChar);
 
 
-  int RSSI = WiFi.RSSI();
+  int RSSI;
+  char RSSIChar[16];
+  RSSI = WiFi.RSSI();
+  itoa(RSSI, RSSIChar, 10);
   Serial.print("RSSI: ");
   Serial.println(RSSI);
-  char RSSIChar[16];
-  itoa(RSSI, RSSIChar, 10);
-  client.publish("esp32test/RSSI", RSSIChar);
+  client.publish("Sensor1/RSSI", RSSIChar);
 
 
   delay(2000);
